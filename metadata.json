@@ -1,0 +1,6 @@
+{
+  "name": "MoneyMate",
+  "description": "Smart Personal Finance & Expense Tracker with AI Insights, automatic categorization, budget alerts, and gamifier habits builder.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
