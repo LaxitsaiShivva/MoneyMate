@@ -168,7 +168,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
       <div className="bg-white dark:bg-zinc-900 border border-gray-150 rounded-3xl p-7.5 w-full max-w-sm shadow-xl space-y-6">
         
         {authMode === 'login' && (
-          <form onSubmit={handleLoginSubmit} className="space-y-4">
+          <form onSubmit={handleLoginSubmit} className="space-y-4" autoComplete="off">
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white">Secure Portal login</h2>
               <p className="text-xs text-gray-400 mt-1">Provide auth identifiers to sync balance logs.</p>
@@ -197,6 +197,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   placeholder="name@gmail.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="off"
                   className="w-full bg-gray-50 dark:bg-zinc-850 pl-10 pr-3.5 py-3 rounded-xl border border-gray-200 focus:outline-none"
                 />
               </div>
@@ -209,6 +210,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
                   className="w-full bg-gray-50 dark:bg-zinc-850 pl-10 pr-3.5 py-3 rounded-xl border border-gray-200 focus:outline-none"
                 />
               </div>
@@ -248,7 +250,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
         )}
 
         {authMode === 'register' && (
-          <form onSubmit={handleRegisterSubmit} className="space-y-4">
+          <form onSubmit={handleRegisterSubmit} className="space-y-4" autoComplete="off">
             <div>
               <h2 className="text-xl font-bold text-gray-900 dark:text-white font-sans">Initialize account metrics</h2>
               <p className="text-xs text-gray-400 mt-1">Register dynamic accounts to automate budgets constraints.</p>
@@ -270,6 +272,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   placeholder="Your Full Name"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
+                  autoComplete="off"
                   className="w-full bg-gray-50 dark:bg-zinc-850 pl-10 pr-3.5 py-3 rounded-xl border border-gray-200 focus:outline-none"
                 />
               </div>
@@ -282,6 +285,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   placeholder="your.email@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="off"
                   className="w-full bg-gray-50 dark:bg-zinc-850 pl-10 pr-3.5 py-3 rounded-xl border border-gray-200 focus:outline-none"
                 />
               </div>
@@ -294,6 +298,7 @@ export default function Auth({ onAuthSuccess }: AuthProps) {
                   placeholder="••••••••"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
                   className="w-full bg-gray-50 dark:bg-zinc-850 pl-10 pr-3.5 py-3 rounded-xl border border-gray-200 focus:outline-none"
                 />
               </div>

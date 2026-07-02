@@ -208,13 +208,22 @@ async function checkSupabaseConnection() {
       } else {
         supabaseStatus.connected = false;
         supabaseStatus.error = data.message || `HTTP ${response.status}`;
-        console.error('❌ Supabase check returned status:', response.status, data);
+        console.warn('⚠️ Supabase connection status check returned:', response.status);
       }
     }
   } catch (err: any) {
     supabaseStatus.connected = false;
     supabaseStatus.error = err.message || 'Network error';
-    console.error('❌ Supabase network verification failed:', err);
+    
+    const isDefault = !process.env.SUPABASE_URL || SUPABASE_URL.includes('ywusbjoewizxxmdbruoc.supabase.co');
+    if (isDefault) {
+      if (!(global as any).hasLoggedSupabaseWarning) {
+        console.log('ℹ️ Supabase not configured or default placeholder project is offline. MoneyMate is running in persistent Local Disk fallback mode.');
+        (global as any).hasLoggedSupabaseWarning = true;
+      }
+    } else {
+      console.warn(`⚠️ Supabase connection failed: ${err.message || 'Network error'}. Fallback to local DB is active.`);
+    }
   }
 }
 
