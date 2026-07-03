@@ -123,9 +123,13 @@ export default function App() {
         setIsLoading(false);
         return;
       }
+      
       const response = await fetch(`/api/user/data?email=${encodeURIComponent(savedEmail)}`);
       if (response.ok) {
         const db = await response.json();
+        // Cache to local storage
+        localStorage.setItem(`moneymate_db_${savedEmail}`, JSON.stringify(db));
+        
         setTransactions(db.transactions || []);
         setBudgets(db.budgets || []);
         setSavingGoals(db.savingGoals || []);
@@ -148,10 +152,113 @@ export default function App() {
         setBadges(db.badges || []);
         setIsAuthenticated(true);
       } else {
-        setIsAuthenticated(false);
+        // Fallback: Check if we have offline local state cached for this user
+        const cachedDbStr = localStorage.getItem(`moneymate_db_${savedEmail}`);
+        if (cachedDbStr) {
+          try {
+            const db = JSON.parse(cachedDbStr);
+            setTransactions(db.transactions || []);
+            setBudgets(db.budgets || []);
+            setSavingGoals(db.savingGoals || []);
+            setRecurringTransactions(db.recurringTransactions || []);
+            setSplitExpenses(db.splitExpenses || []);
+            setDebts(db.debts || []);
+            setInvestments(db.investments || []);
+            const derivedName = savedEmail.split('@')[0].split(/[._-]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'User';
+            setUserProfile(db.userProfile || {
+              name: derivedName,
+              email: savedEmail,
+              currency: 'INR',
+              dailyStreak: 1,
+              xp: 10,
+              level: 1,
+              enable2FA: false,
+              theme: 'light'
+            });
+            setNotifications(db.notifications || []);
+            setBadges(db.badges || []);
+            setIsAuthenticated(true);
+            setIsLoading(false);
+            return;
+          } catch (cacheErr) {}
+        }
+        
+        // If absolutely no server response and no cache, auto-initialize a clean client fallback
+        const derivedName = savedEmail.split('@')[0].split(/[._-]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'User';
+        const fallbackProfile: UserProfile = {
+          name: derivedName,
+          email: savedEmail,
+          currency: 'INR',
+          dailyStreak: 1,
+          xp: 10,
+          level: 1,
+          enable2FA: false,
+          theme: 'light'
+        };
+        setUserProfile(fallbackProfile);
+        setTransactions([]);
+        setBudgets([
+          { category: 'Food', limit: 8000, spent: 0 },
+          { category: 'Shopping', limit: 5000, spent: 0 },
+          { category: 'Transport', limit: 4000, spent: 0 },
+          { category: 'Entertainment', limit: 3000, spent: 0 },
+          { category: 'Education', limit: 6000, spent: 0 },
+          { category: 'Healthcare', limit: 4000, spent: 0 },
+          { category: 'Bills', limit: 15000, spent: 0 },
+          { category: 'Investments', limit: 10000, spent: 0 },
+          { category: 'Other', limit: 3000, spent: 0 }
+        ]);
+        setSavingGoals([]);
+        setRecurringTransactions([]);
+        setSplitExpenses([]);
+        setDebts([]);
+        setInvestments([]);
+        setNotifications([
+          { id: 'n1', title: 'Welcome to MoneyMate', message: 'Local session initialized. Add your first transactions to begin.', type: 'success', date: new Date().toISOString().split('T')[0], read: false }
+        ]);
+        setBadges([
+          { id: 'b1', name: 'Starter Tracker', description: 'Created your first expense log', category: 'general', unlocked: false, progress: 0, maxProgress: 1 },
+          { id: 'b2', name: 'Savings Guru', description: 'Save a total of ₹50,000 across savings goals', category: 'savings', unlocked: false, progress: 0, maxProgress: 50000 },
+          { id: 'b3', name: 'Budget Warrior', description: 'Maintain spending under limits', category: 'budget', unlocked: false, progress: 0, maxProgress: 30 }
+        ]);
+        setIsAuthenticated(true);
       }
     } catch (e) {
       console.warn('Backend server unreachable, falling back to local fallback state layers!', e);
+      // Try reading from cache on absolute network error
+      const savedEmail = localStorage.getItem('moneymate_authenticated_email');
+      if (savedEmail) {
+        const cachedDbStr = localStorage.getItem(`moneymate_db_${savedEmail}`);
+        if (cachedDbStr) {
+          try {
+            const db = JSON.parse(cachedDbStr);
+            setTransactions(db.transactions || []);
+            setBudgets(db.budgets || []);
+            setSavingGoals(db.savingGoals || []);
+            setRecurringTransactions(db.recurringTransactions || []);
+            setSplitExpenses(db.splitExpenses || []);
+            setDebts(db.debts || []);
+            setInvestments(db.investments || []);
+            const derivedName = savedEmail.split('@')[0].split(/[._-]/).map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'User';
+            setUserProfile(db.userProfile || {
+              name: derivedName,
+              email: savedEmail,
+              currency: 'INR',
+              dailyStreak: 1,
+              xp: 10,
+              level: 1,
+              enable2FA: false,
+              theme: 'light'
+            });
+            setNotifications(db.notifications || []);
+            setBadges(db.badges || []);
+            setIsAuthenticated(true);
+            setIsLoading(false);
+            return;
+          } catch (cacheErr) {}
+        }
+      }
+      setIsAuthenticated(false);
     } finally {
       setIsLoading(false);
     }
@@ -188,6 +295,9 @@ export default function App() {
       notifications: updatedN,
       badges
     };
+
+    // Keep localStorage instantly synchronized
+    localStorage.setItem(`moneymate_db_${updatedU.email}`, JSON.stringify(dbPayload));
 
     try {
       await fetch('/api/user/data', {
